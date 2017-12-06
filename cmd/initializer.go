@@ -1,12 +1,11 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/golang/glog"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,8 +14,8 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
-	"kubevirt.io/kubevirt/pkg/kubecli"
-	"kubevirt.io/kubevirt/pkg/service"
+	"github.com/kubevirt/kubevirt/pkg/kubecli"
+	"github.com/kubevirt/kubevirt/pkg/service"
 )
 
 const (
@@ -29,7 +28,8 @@ type vfioInitializer struct {
 func (init vfioInitializer) Run() {
 	clientSet, err := kubecli.GetKubevirtClient()
 	if err != nil {
-		glog.Fatal(err)
+		//glog.Fatal(err)
+		log.Print(err)
 	}
 
 	restClient := clientSet.RestClient()
@@ -41,7 +41,8 @@ func (init vfioInitializer) Run() {
 			AddFunc: func(obj interface{}) {
 				err := initializeVirtualMachine(obj.(*corev1.Pod), &clientSet)
 				if err != nil {
-					glog.Error(err)
+					//glog.Error(err)
+					log.Print(err)
 				}
 			},
 		},
@@ -54,7 +55,8 @@ func (init vfioInitializer) Run() {
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
 
-	glog.V(3).Info("Received signal (SIGINT, SIGTERM), shutting down...")
+	//glog.V(3).Info("Received signal (SIGINT, SIGTERM), shutting down...")
+	log.Print("shutting down")
 	close(stop)
 }
 
@@ -64,7 +66,8 @@ func initializeVirtualMachine(pod *corev1.Pod, clientset *kubecli.KubevirtClient
 		var initializerName string
 
 		if initializerName == pendingInitializers[0].Name {
-			glog.Infof("Initializing pod: %s", pod.Name)
+			//glog.Infof("Initializing pod: %s", pod.Name)
+			log.Print("Initializing pod")
 		}
 	}
 
